@@ -1,3 +1,3 @@
 # NFT Live Bot
 
-Experimental custom Discord Bot for the **NFT Live** Discord Server
+Custom Discord Bot for the **NFT Live** Discord Server *(under construction)*
