@@ -1,15 +1,14 @@
 // formatting
 const { stripIndent } = require('common-tags')
 
-// stores API keys in separate JSON file
-const { token } = require('./token.json');
-
 // require the discord.js module
 const Discord = require('discord.js');
 
 // create a new Discord client
 const bot = new Discord.Client();
 
+// stores API keys in separate JSON file
+const { token } = require('./token.json');
 // auth
 bot.login(token);
 
@@ -40,28 +39,19 @@ bot.on('message', message => {
 	}
 
 	// fetch AtomicAssets items
-	else if (message.content === 'assets') {
-		const https = require('https')
-		const options = {
-			hostname: 'https://test.wax.api.atomicassets.io/atomicassets',
-			path: '/v1/assets?page=1&limit=100&order=asc&sort=asset_id',
-			method: 'GET'
-		}
+	else if (message.content === 'ah latest') {
+		const fetch = require('node-fetch');
+		fetch('http://test.wax.api.atomicassets.io/atomicassets/v1/assets?page=1&limit=1&order=desc&sort=updated').then(res => res.json()).then(
+			assets => {
+				console.log(assets)
+				message.channel.send(stripIndent`
+					Name: ${ assets.data[0].name }
+					Owner: ${ assets.data[0].owner }
+					Asset ID: ${ assets.data[0].asset_id }
 
-		const req = https.request(options, res => {
-			console.log(`statusCode: ${res.statusCode}`)
-
-			res.on('data', d => {
-				process.stdout.write(d)
-				return message.reply(d)
-			})
-		})
-
-		req.on('error', error => {
-			console.error(error)
-		})
-
-		req.end()
+				`)
+			}
+		);
 	}
 });
 
