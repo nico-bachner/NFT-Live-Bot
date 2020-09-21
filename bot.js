@@ -15,43 +15,72 @@ bot.login(token);
 // when the client is ready, run this code
 // this event will only trigger one time after logging in
 bot.once('ready', () => {
-	console.log('Bot is live');
+	console.log(stripIndent`
+	--- Bot online ---
+	`);
+});
+
+// new member welcome
+bot.on('guildMemberAdd', member => {
+	console.log(member)
+	member.guild.channels.cache.get('750028068264869898').send(`:wave: Welcome, <@${member.id}> to **${member.guild.name}**!`); 
 });
 
 bot.on('message', message => {
+	const args = message.content.trim().split(' ');
+	const command = args.shift().toLowerCase();
+
 	console.log(message.author.username, ":", message.content)
 
 	// simple info commands
-	if (message.content === 'server info') {
+	if (command == 'server-info') {
 		message.channel.send(stripIndent`
-			__*Server Info*__
-			Server Name: **${message.guild.name}**
-			Members: **${message.guild.memberCount}**
+			----- **${message.guild.name}** -----
+
+			Founded: ${message.guild.createdAt}
+			Region: ${message.guild.region}
+
+			Owner: ${message.guild.owner}
+			Members: ${message.guild.memberCount}
+
+			Rules: ${message.guild.rulesChannel}
 		`);
 	} 
-	else if (message.content === 'user info') {
+	else if (command === 'user-info') {
 		return message.reply(`your username is ${message.author.username} and your user ID is ${message.author.id}`);
 	} 
 
 	// easily delete multiple messages
-	else if (message.content === 'prune 5') {
+	else if (command === 'prune') {
 		message.channel.bulkDelete(6);
 	}
 
 	// fetch AtomicAssets items
-	else if (message.content === 'ah latest') {
-		const fetch = require('node-fetch');
-		fetch('http://test.wax.api.atomicassets.io/atomicassets/v1/assets?page=1&limit=1&order=desc&sort=updated').then(res => res.json()).then(
-			assets => {
-				console.log(assets)
-				message.channel.send(stripIndent`
-					Name: ${ assets.data[0].name }
-					Owner: ${ assets.data[0].owner }
-					Asset ID: ${ assets.data[0].asset_id }
-
-				`)
-			}
-		);
+	if (command === 'ah') {
+		if ( args[0] === 'fetch' ) {
+			const fetch = require('node-fetch');
+			const querystring = require('querystring');
+			query = "page=1&limit=1&order=desc&sort=updated"
+			query = querystring.parse(query)
+			query.limit = args[1]
+			query = querystring.encode(query)
+			fetch("http://test.wax.api.atomicassets.io/atomicassets/v1/assets?"+query).then(res => res.json()).then(
+				assets => {
+					amount = parseInt(args[1])
+					total_items = amount - 1
+					item = 0
+					while (item <= total_items) {
+						message.channel.send(stripIndent`
+							**${ item + 1 }**
+							Name: ${ assets.data[item].name }
+							Owner: ${ assets.data[item].owner }
+							Asset ID: ${ assets.data[item].asset_id }
+						`)
+						item += 1
+					}
+				}
+			);
+		}
 	}
 });
 
