@@ -28,12 +28,11 @@ bot.on('guildMemberAdd', member => {
 
 bot.on('message', message => {
 	const args = message.content.trim().split(' ');
-	const command = args.shift().toLowerCase();
 
 	console.log(message.author.username, ":", message.content)
 
 	// simple info commands
-	if (command == 'server-info') {
+	if (args[0] == 'server-info') {
 		message.channel.send(stripIndent`
 			----- **${message.guild.name}** -----
 
@@ -46,23 +45,23 @@ bot.on('message', message => {
 			Rules: ${message.guild.rulesChannel}
 		`);
 	} 
-	else if (command === 'user-info') {
+	else if (args[0] === 'user-info') {
 		return message.reply(`your username is ${message.author.username} and your user ID is ${message.author.id}`);
 	} 
 
 	// easily delete multiple messages
-	else if (command === 'prune') {
+	else if (args[0] === 'prune') {
 		message.channel.bulkDelete(6);
 	}
 
 	// fetch AtomicAssets items
-	if (command === 'ah') {
-		if ( args[0] === 'fetch' ) {
+	if (args[0] == 'ah') {
+		if ( args[1] == 'latest' ) {
 			const fetch = require('node-fetch');
 			const querystring = require('querystring');
 			query = "page=1&limit=1&order=desc&sort=updated"
 			query = querystring.parse(query)
-			query.limit = args[1]
+			query.limit = args[2]
 			query = querystring.encode(query)
 			fetch("http://test.wax.api.atomicassets.io/atomicassets/v1/assets?"+query).then(res => res.json()).then(
 				assets => {
